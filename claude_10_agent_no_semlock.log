@@ -1,0 +1,38 @@
+All 10 workers have finished. Here's the complete report:
+
+---
+
+## Final Diff
+
+All 10 function bodies were successfully modified. The diff above shows every assigned change cleanly applied.
+
+---
+
+## Edit Confirmation — All 10 Present
+
+| # | Worker | Function | Change | Present |
+|---|--------|----------|--------|---------|
+| 1 | Worker 1 | `classify_retry_window` | VIP early-return for `retry_count >= LIMIT - 1` | ✓ |
+| 2 | Worker 2 | `apply_retry_backoff` | Delays: 20 / 240 / 720 | ✓ |
+| 3 | Worker 3 | `should_hold_for_fraud` | `threshold -= 3` when retry_count > 0 | ✓ |
+| 4 | Worker 4 | `compute_tax_buffer` | `max(DEFAULT_TAX_BUFFER_CENTS, ...)` clamp | ✓ |
+| 5 | Worker 5 | `estimate_capture_amount` | `capture += 15` for VIP | ✓ |
+| 6 | Worker 6 | `reconcile_webhook_event` | `.replace(" ", "_")` + `"duplicate_replayed"` | ✓ |
+| 7 | Worker 7 | `build_customer_notice` | New retry message with `customer_id` | ✓ |
+| 8 | Worker 8 | `reserve_ledger_code` | `"vip_manual_review"` highest-priority branch | ✓ |
+| 9 | Worker 9 | `route_charge_outcome` | `"retry_soon_queue"` for `short_delay` | ✓ |
+| 10 | Worker 10 | `summarize_charge_attempt` | `"retry_delay_seconds": delay_seconds` in dict | ✓ |
+
+---
+
+## Retry Report
+
+| Worker | Retries | Reason |
+|--------|---------|--------|
+| Workers 1, 2, 4, 6, 7, 8 | 0 | First attempt succeeded |
+| Worker 5 | 0 (confirmed) | Used extra re-reads internally but edit landed |
+| Worker 3 | 3 Edit collisions | Heavy concurrent activity; used atomic Python replace fallback |
+| Worker 9 | 1 retry | File modified between read and edit |
+| Worker 10 | 1 retry | Concurrent modification caused first edit to fail |
+
+**Total retries caused by overwrites/displacement: 5** (3 from Worker 3 + 1 from Worker 9 + 1 from Worker 10). Without locking, workers racing on the same file needed to re-read and re-apply — exactly the contention SemLock is designed to prevent.

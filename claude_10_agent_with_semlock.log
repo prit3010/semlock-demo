@@ -1,0 +1,32 @@
+---
+
+## All 10 Workers Complete
+
+### Final diff for `billing/charge_pipeline.py`
+
+All 10 changes landed cleanly. Full diff above.
+
+---
+
+### Worker summary — SemLock regions used
+
+| Worker | Function | Commit Event ID | Region (distinct) |
+|--------|----------|-----------------|-------------------|
+| 1 | `classify_retry_window` | 93 | `top_level_function::classify_retry_window` |
+| 2 | `apply_retry_backoff` | 96 | `top_level_function::apply_retry_backoff` |
+| 3 | `should_hold_for_fraud` | 99 | `top_level_function::should_hold_for_fraud` |
+| 4 | `compute_tax_buffer` | 102 | `top_level_function::compute_tax_buffer` |
+| 5 | `estimate_capture_amount` | 105 | `top_level_function::estimate_capture_amount` |
+| 6 | `reconcile_webhook_event` | 108 | `top_level_function::reconcile_webhook_event` |
+| 7 | `build_customer_notice` | 111 | `top_level_function::build_customer_notice` |
+| 8 | `reserve_ledger_code` | 114 | `top_level_function::reserve_ledger_code` |
+| 9 | `route_charge_outcome` | 117 | `top_level_function::route_charge_outcome` |
+| 10 | `summarize_charge_attempt` | 119 | `top_level_function::summarize_charge_attempt` |
+
+All 10 regions are **distinct** — no two workers ever held overlapping locks.
+
+---
+
+### Conflicts, retries, and errors
+
+**Zero.** Every worker acquired its lock, got the region, and committed on the **first attempt** with no contention, stale-hash mismatches, or semantic rejections. The commit event IDs increment monotonically (93 → 96 → 99 → … → 119), confirming SemLock serialized each commit cleanly even though all 10 agents were racing in parallel.
