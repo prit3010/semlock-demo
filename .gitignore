@@ -1,2 +1,3 @@
 __pycache__/
 .semlock/
+claude_*.log
