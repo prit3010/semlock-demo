@@ -1,0 +1,7 @@
+"""Billing configuration constants used by the demo pipeline."""
+
+DEFAULT_RETRY_LIMIT = 3
+HIGH_RISK_SCORE = 80
+VIP_REVIEW_SCORE = 65
+DEFAULT_TAX_BUFFER_CENTS = 35
+VIP_LEDGER_THRESHOLD_CENTS = 100_000

@@ -1,0 +1,9 @@
+[project]
+name = "semlock-billing-demo"
+version = "0.1.0"
+description = "Standalone billing demo project for SemLock MCP testing."
+requires-python = ">=3.12"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
